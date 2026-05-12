@@ -27,8 +27,13 @@ const { clients } = JSON.parse(fs.readFileSync(clientsPath, "utf-8"));
 
 // Each entry returns either a path string (same on both sides) or an object
 // { prod, preview } when the paths differ across reference/test.
+//
+// Preview paths follow the kismet.travel WL routing canon from
+// `kismet.travel/lib/wl-link-resolution.ts` (resolveKismetPath switch).
+// Client apex paths often differ — set per-client `pageTypePathOverrides` in
+// clients.json with { prod, preview } pairs to map the difference.
 const DEFAULT_PAGE_TYPE_PATHS = {
-  // Kismet.travel WL HOMEPAGE renders at /home; client apex serves it at /.
+  // Kismet.travel WL HOMEPAGE renders at /home; client apex usually serves it at /.
   HOMEPAGE: () => ({ prod: "/", preview: "/home" }),
   OWNER_LANDING: () => "/owner-landing",
   ABOUT: () => "/about",
@@ -36,14 +41,9 @@ const DEFAULT_PAGE_TYPE_PATHS = {
   FAQ: () => "/faq",
   BLOG_INDEX: () => "/blog",
   BLOG_POST: (ex) => `/blog/${ex.blogSlug}`,
-  AREA_GUIDE: (ex) => `/area-guides/${ex.areaGuideSlug}`,
   GROUP_INDEX: () => "/groups",
   PROPERTY_GROUP: (ex) => `/g/${ex.groupSlug}`,
-  PROPERTY: (ex) => `/p/${ex.propertySlug}`,
-  AREA_GUIDES_INDEX: () => "/area-guides",
-  AREA_GUIDES_CATEGORY: () => "/area-guides/category/general",
-  SEARCH_RESULTS: () => "/search-results",
-  LEGAL: () => "/privacy",
+  PROPERTY: (ex) => `/vr/${ex.propertySlug}`,
 };
 
 const VIEWPORTS = [
