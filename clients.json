@@ -8,7 +8,8 @@
         "blogSlug": "why-vacation-rentals-are-a-great-option-for-family-getaways",
         "areaGuideSlug": "things-to-do-in-seaside-oregon",
         "groupSlug": "seaside",
-        "propertySlug": "the-salt-life---oceanfront-escape-hot-tub"
+        "prodPropertySlug": "5th-st-bungalow---historic-charm-near-3rd-st",
+        "previewPropertySlug": "5th-st-bungalow-historic-charm-near-3rd-st-mcminnville"
       },
       "pageTypes": [
         "HOMEPAGE",
@@ -29,8 +30,8 @@
         },
         "GROUP_INDEX": { "prod": "/collections", "preview": "/groups" },
         "PROPERTY": {
-          "prod": "/vacation-rentals/rental/{propertySlug}/",
-          "preview": "/vr/{propertySlug}"
+          "prod": "/vacation-rentals/rental/{prodPropertySlug}/",
+          "preview": "/vr/{previewPropertySlug}"
         }
       },
       "customPages": []

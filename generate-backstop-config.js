@@ -58,12 +58,16 @@ const REMOVE_SELECTORS = [
   "time[datetime]",
 ];
 
+// Generic interpolation: replace `{anyKey}` with examples.anyKey from clients.json.
+// New per-side keys (e.g. prodPropertySlug, previewPropertySlug) work out of the box.
 function interpolatePath(template, examples) {
-  return template
-    .replace(/\{blogSlug\}/g, examples.blogSlug || "")
-    .replace(/\{areaGuideSlug\}/g, examples.areaGuideSlug || "")
-    .replace(/\{groupSlug\}/g, examples.groupSlug || "")
-    .replace(/\{propertySlug\}/g, examples.propertySlug || "");
+  return template.replace(/\{(\w+)\}/g, (_match, key) => {
+    if (examples[key] === undefined) {
+      console.warn(`  WARN: template references {${key}} but examples.${key} is unset`);
+      return "";
+    }
+    return examples[key];
+  });
 }
 
 // Returns { prod, preview } regardless of whether the source was a string
