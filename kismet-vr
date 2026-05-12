@@ -91,15 +91,22 @@ echo "   Failing scenarios are normal during active development — review the r
 npx backstop test || true
 
 echo
+echo "→ Generating clickable URL summary..."
+node generate-summary.js
+
+echo
 echo "→ Opening HTML report..."
-REPORT_PATH="$SCRIPT_DIR/backstop_data/html_report/index.html"
-if [[ -f "$REPORT_PATH" ]]; then
-  open "$REPORT_PATH"
-  echo "   Report path: $REPORT_PATH"
+SUMMARY_PATH="$SCRIPT_DIR/backstop_data/html_report/summary.html"
+DEFAULT_PATH="$SCRIPT_DIR/backstop_data/html_report/index.html"
+if [[ -f "$SUMMARY_PATH" ]]; then
+  open "$SUMMARY_PATH"
+  echo "   Friendly summary (clickable URLs):  $SUMMARY_PATH"
+  echo "   Full BackstopJS diff report:        $DEFAULT_PATH"
 else
-  echo "   Report not found at $REPORT_PATH — check 'npx backstop test' output above."
-  exit 1
+  echo "   Summary not found at $SUMMARY_PATH — falling back to default report"
+  open "$DEFAULT_PATH"
 fi
 
 echo
-echo "→ Done. Review the HTML report to triage any failing scenarios."
+echo "→ Done. The summary page lists every scenario with clickable prod + preview URLs."
+echo "  Click 'Open full BackstopJS report' from the summary to see side-by-side image diffs."

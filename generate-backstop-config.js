@@ -68,9 +68,21 @@ function resolvePath(client, pageType) {
   return factory(client.examples);
 }
 
-function makeScenario(client, label, pagePath) {
+function prettyClientName(slug) {
+  // cascadia-getaways → Cascadia Getaways
+  return slug
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+function makeScenario(client, slug, pageTypeOrCustomLabel, pagePath) {
   const referenceUrl = client.prodDomain + pagePath;
   const url = client.previewBase.replace("{PREVIEW_HOST}", PREVIEW_HOST) + pagePath;
+  // Human-friendly label that surfaces in the BackstopJS report. Keep it short — the
+  // standard report UI truncates long labels. Full URLs are emitted to scenarios.html.
+  const prodHost = client.prodDomain.replace(/^https?:\/\//, "").replace(/^www\./, "");
+  const label = `${prettyClientName(slug)} ${pageTypeOrCustomLabel} · ${prodHost} vs preview`;
   return {
     label,
     referenceUrl,
@@ -90,14 +102,14 @@ for (const client of clients) {
   for (const pageType of client.pageTypes) {
     const pagePath = resolvePath(client, pageType);
     if (pagePath === null) continue;
-    const label = `${slug}-${pageType}`;
-    scenarios.push(makeScenario(client, label, pagePath));
+    scenarios.push(makeScenario(client, slug, pageType, pagePath));
   }
 
   for (const customSlug of client.customPages || []) {
     const cleanSlug = customSlug.replace(/^\/+|\/+$/g, "");
-    const label = `${slug}-${cleanSlug.replace(/\//g, "-")}`;
-    scenarios.push(makeScenario(client, label, `/${cleanSlug}`));
+    scenarios.push(
+      makeScenario(client, slug, `CUSTOM: /${cleanSlug}`, `/${cleanSlug}`)
+    );
   }
 }
 
