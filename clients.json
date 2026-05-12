@@ -1,0 +1,55 @@
+{
+  "clients": [
+    {
+      "slug": "cascadia-getaways",
+      "prodDomain": "https://www.cascadiagetaways.com",
+      "previewBase": "https://{PREVIEW_HOST}/wl/vrm/cascadia-getaways",
+      "examples": {
+        "blogSlug": "why-vacation-rentals-are-a-great-option-for-family-getaways",
+        "areaGuideSlug": "things-to-do-in-seaside-oregon",
+        "groupSlug": "seaside",
+        "propertySlug": "the-salt-life---oceanfront-escape-hot-tub"
+      },
+      "pageTypes": [
+        "HOMEPAGE",
+        "OWNER_LANDING",
+        "ABOUT",
+        "CONTACT",
+        "FAQ",
+        "BLOG_INDEX",
+        "BLOG_POST",
+        "AREA_GUIDE",
+        "GROUP_INDEX",
+        "PROPERTY_GROUP",
+        "PROPERTY",
+        "AREA_GUIDES_INDEX",
+        "AREA_GUIDES_CATEGORY",
+        "SEARCH_RESULTS",
+        "LEGAL"
+      ],
+      "pageTypePathOverrides": {
+        "ABOUT": "/about-us",
+        "FAQ": "/about-us/faq/",
+        "BLOG_INDEX": "/blog",
+        "BLOG_POST": "/{blogSlug}/",
+        "AREA_GUIDE": "/area-guides/{areaGuideSlug}/",
+        "GROUP_INDEX": "/collections",
+        "PROPERTY_GROUP": "/g/{groupSlug}",
+        "PROPERTY": "/vacation-rentals/rental/{propertySlug}/",
+        "AREA_GUIDES_INDEX": "/area-guides",
+        "AREA_GUIDES_CATEGORY": "/area-guides/category/mt-hood-area-guide",
+        "SEARCH_RESULTS": "/vacation-rentals/results/",
+        "LEGAL": "/privacy"
+      },
+      "customPages": [
+        "2-bedroom-rentals",
+        "oregon-coast-rentals",
+        "pet-friendly-vacation-rentals-oregon/",
+        "hot-tub-rentals",
+        "property-management",
+        "property-management/get-a-rental-estimate",
+        "newsletter"
+      ]
+    }
+  ]
+}
