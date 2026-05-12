@@ -2,23 +2,42 @@
 
 Local prod-vs-Vercel-preview visual diff for white-label client pages before merging kismet.travel PRs.
 
+## TL;DR — One Command
+
+```bash
+./kismet-vr 1102
+```
+
+Replace `1102` with any kismet.travel PR number. The script:
+1. Pulls the Vercel preview URL from that PR's comments via `gh`
+2. Regenerates `backstop.json` from `clients.json`
+3. Captures reference screenshots from each client's prod site
+4. Captures test screenshots from the preview, diffs against reference
+5. Opens the HTML report in your browser
+
+If you have a preview URL already and want to skip the PR lookup:
+
+```bash
+./kismet-vr --url https://kismettravel-ithnml8f4-kismet.vercel.app
+```
+
+`./kismet-vr --help` for usage.
+
 ## One-Time Setup
 
 ```bash
 cd backstop
-npm install           # already done in this branch
+npm install           # already done on this branch
 git checkout kismet-fleet
 ```
 
-Requires Node 18+ and a Chromium-based browser (Puppeteer ships its own).
+Requires Node 18+, the `gh` CLI authed to `kismet-tech`, and a Chromium-based browser (Puppeteer ships its own).
 
-## Per-PR Workflow
-
-Every time you open or update a kismet.travel PR that touches storefront block rendering:
+## Manual Workflow (if you want to step through it)
 
 ```bash
-# 1. Get the Vercel preview URL from the PR (e.g. kismet-travel-abc123.vercel.app)
-export PREVIEW_HOST=kismet-travel-abc123.vercel.app
+# 1. Get the Vercel preview URL from the PR (e.g. kismettravel-abc.vercel.app)
+export PREVIEW_HOST=kismettravel-abc.vercel.app
 
 # 2. Generate the backstop config (reads clients.json → writes backstop.json)
 node generate-backstop-config.js
@@ -33,7 +52,7 @@ npx backstop test
 #    → backstop_data/html_report/index.html
 ```
 
-If any scenarios fail, the report shows side-by-side prod vs preview with a diff overlay. Investigate failures, push fixes to the PR, then re-run from step 2.
+If any scenarios fail, the report shows side-by-side prod vs preview with a diff overlay. Investigate failures, push fixes to the PR, then re-run from step 2 (or just re-run `./kismet-vr <PR>`).
 
 ## Adding a New Live Client
 

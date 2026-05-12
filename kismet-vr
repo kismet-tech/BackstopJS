@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+# kismet-vr — one-command visual regression run against a kismet.travel PR
+#
+# Usage:
+#   ./kismet-vr <PR-NUMBER>           # auto-fetch Vercel preview URL from the PR
+#   ./kismet-vr --url <preview-host>  # use a specific preview URL directly
+#   ./kismet-vr --help
+#
+# What it does:
+#   1. Resolve the Vercel preview URL from the PR (or take the explicit one)
+#   2. Generate backstop.json scenarios from clients.json
+#   3. Capture reference screenshots from each client's prod site
+#   4. Capture test screenshots from the Vercel preview
+#   5. Auto-open the HTML report
+#
+# Requires:
+#   - gh CLI authed to kismet-tech (for --pr resolution)
+#   - npm install already run in this directory
+#   - clients.json + generate-backstop-config.js in this directory
+#
+# Repo: kismet-tech/BackstopJS (kismet-fleet branch) — see README-kismet.md
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+usage() {
+  sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'
+  exit 0
+}
+
+if [[ $# -eq 0 || "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+  usage
+fi
+
+PREVIEW_HOST=""
+PR_NUMBER=""
+
+if [[ "${1:-}" == "--url" ]]; then
+  PREVIEW_HOST="${2:-}"
+  if [[ -z "$PREVIEW_HOST" ]]; then
+    echo "Error: --url requires a host argument (e.g. kismet-travel-abc.vercel.app)" >&2
+    exit 1
+  fi
+  # Strip protocol if user passed full URL
+  PREVIEW_HOST="${PREVIEW_HOST#https://}"
+  PREVIEW_HOST="${PREVIEW_HOST#http://}"
+  PREVIEW_HOST="${PREVIEW_HOST%/}"
+else
+  PR_NUMBER="$1"
+  if ! [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
+    echo "Error: first arg must be a PR number or --url <host>" >&2
+    exit 1
+  fi
+
+  echo "→ Fetching Vercel preview URL from PR #$PR_NUMBER..."
+  # Find the latest "Preview deploy ready" comment from the PR
+  PREVIEW_URL=$(gh pr view "$PR_NUMBER" --repo kismet-tech/kismet.travel --json comments \
+    --jq '.comments[] | select(.body | contains("Preview deploy ready")) | .body' \
+    | grep -oE 'https://kismettravel-[a-z0-9-]+\.vercel\.app' \
+    | tail -1)
+
+  if [[ -z "$PREVIEW_URL" ]]; then
+    echo "Error: could not find a 'Preview deploy ready' comment with a Vercel URL on PR #$PR_NUMBER" >&2
+    echo "Try: gh pr view $PR_NUMBER --repo kismet-tech/kismet.travel --comments" >&2
+    exit 1
+  fi
+
+  PREVIEW_HOST="${PREVIEW_URL#https://}"
+  PREVIEW_HOST="${PREVIEW_HOST%/}"
+  echo "→ Resolved preview: $PREVIEW_URL"
+fi
+
+export PREVIEW_HOST
+echo "→ PREVIEW_HOST=$PREVIEW_HOST"
+
+echo
+echo "→ Generating backstop.json from clients.json..."
+node generate-backstop-config.js
+
+echo
+echo "→ Capturing reference screenshots from prod (this hits real client sites)..."
+echo "   Tip: if any client's prod site is rate-limiting, this may take several minutes."
+npx backstop reference
+
+echo
+echo "→ Capturing test screenshots from preview + diffing against reference..."
+echo "   Failing scenarios are normal during active development — review the report."
+# `backstop test` exits non-zero if any scenarios fail; we want to continue and open the report regardless
+npx backstop test || true
+
+echo
+echo "→ Opening HTML report..."
+REPORT_PATH="$SCRIPT_DIR/backstop_data/html_report/index.html"
+if [[ -f "$REPORT_PATH" ]]; then
+  open "$REPORT_PATH"
+  echo "   Report path: $REPORT_PATH"
+else
+  echo "   Report not found at $REPORT_PATH — check 'npx backstop test' output above."
+  exit 1
+fi
+
+echo
+echo "→ Done. Review the HTML report to triage any failing scenarios."
