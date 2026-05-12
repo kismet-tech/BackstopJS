@@ -13,7 +13,7 @@ Replace `1102` with any kismet.travel PR number. The script:
 2. Regenerates `backstop.json` from `clients.json`
 3. Captures reference screenshots from each client's prod site
 4. Captures test screenshots from the preview, diffs against reference
-5. Opens the HTML report in your browser
+5. Opens the summary report in your browser
 
 If you have a preview URL already and want to skip the PR lookup:
 
@@ -23,7 +23,9 @@ If you have a preview URL already and want to skip the PR lookup:
 
 `./kismet-vr --help` for usage.
 
-## One-Time Setup
+## One-Time Setup (two steps)
+
+### Step 1 — Install dependencies + check out the kismet-fleet branch
 
 ```bash
 cd backstop
@@ -32,6 +34,33 @@ git checkout kismet-fleet
 ```
 
 Requires Node 18+, the `gh` CLI authed to `kismet-tech`, and a Chromium-based browser (Puppeteer ships its own).
+
+### Step 2 — Generate a Vercel Protection Bypass token (required for the preview side to render)
+
+Vercel preview URLs are auth-gated by default. Without bypass auth, Puppeteer captures the Vercel login wall instead of the real rendered page — every "drift" looks 100% because we're comparing Cascadia prod against a login page.
+
+To bypass:
+
+1. Vercel dashboard → kismet.travel project → **Settings** → **Deployment Protection**
+2. Scroll to **Protection Bypass for Automation**
+3. Click **Add new token** → name it (e.g. "kismet-vr") → copy the generated secret
+4. Save the secret locally:
+
+```bash
+echo 'VERCEL_BYPASS_TOKEN=<paste-the-secret-here>' > .env
+```
+
+The `.env` file is gitignored in this directory. The `kismet-vr` CLI sources it automatically on every run.
+
+To verify the token works:
+
+```bash
+source .env
+node generate-backstop-config.js
+# Look for: "Vercel bypass: ENABLED (preview URLs include bypass params)"
+```
+
+If you ever rotate the token in Vercel, just update `.env` — no other change needed.
 
 ## Manual Workflow (if you want to step through it)
 

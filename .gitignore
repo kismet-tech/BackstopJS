@@ -42,3 +42,11 @@ compare/output/config\.js
 
 # Tests
 *integrationTestDir
+
+# Kismet-fleet local secrets — VERCEL_BYPASS_TOKEN, etc.
+.env
+.env.local
+
+# Generated each run by generate-backstop-config.js
+backstop.json
+

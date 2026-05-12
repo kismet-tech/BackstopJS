@@ -25,6 +25,15 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+# Source local env file (gitignored) for secrets like VERCEL_BYPASS_TOKEN.
+# The .env file is line-oriented `KEY=value` — we set -a so every var is exported.
+if [[ -f .env ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  . ./.env
+  set +a
+fi
+
 usage() {
   sed -n '2,/^$/p' "$0" | sed 's/^# \{0,1\}//'
   exit 0
